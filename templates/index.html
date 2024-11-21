@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat em Tempo Real</title>
+  <style>
+    /* Estilos gerais */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #e5ddd5;
+    }
+
+    .chat-container {
+      width: 400px;
+      height: 600px;
+      margin: 50px auto;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background-color: #25d366;
+      color: white;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: #f1f1f1;
+    }
+
+    .message {
+      display: flex;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+
+    .message.sent {
+      justify-content: flex-end;
+    }
+
+    .message.received {
+      justify-content: flex-start;
+    }
+
+    .message .content {
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 75%;
+      word-wrap: break-word;
+    }
+
+    .message.sent .content {
+      background-color: #25d366;
+      color: white;
+      border-radius: 20px 20px 0 20px;
+    }
+
+    .message.received .content {
+      background-color: #fff;
+      color: black;
+      border-radius: 20px 20px 20px 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .input-container {
+      padding: 10px;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid #ddd;
+    }
+
+    .input-container input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 20px;
+      font-size: 14px;
+      background-color: #f1f1f1;
+      margin-right: 10px;
+    }
+
+    .input-container button {
+      background-color: #25d366;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 20px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .input-container button:hover {
+      background-color: #128c7e;
+    }
+
+    #username-container {
+      width: 100%;
+      height: 100%;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #username-container input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      width: 80%;
+      margin-bottom: 10px;
+    }
+
+    #username-container button {
+      background-color: #25d366;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #username-container button:hover {
+      background-color: #128c7e;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Tela de login do usuário -->
+  <div id="username-container">
+    <input type="text" id="username-input" placeholder="Digite seu nome de usuário">
+    <button onclick="setUser()">Entrar</button>
+  </div>
+
+  <!-- Container do Chat -->
+  <div class="chat-container" style="display: none;" id="chat-container">
+    <div class="chat-header">
+      <span class="username" id="chat-username">Usuário</span>
+    </div>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="input-container">
+      <input type="text" id="message-input" placeholder="Digite sua mensagem">
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+  <script>
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // Receber e exibir as mensagens
+    socket.on('message', function(msg) {
+      const chatBox = document.getElementById('chat-box');
+      const messageElement = document.createElement('div');
+      const userName = msg.split(":")[0];  // Nome do usuário na mensagem
+
+      // Estilo para a mensagem enviada pelo usuário
+      messageElement.classList.add('message', userName === document.getElementById('chat-username').textContent ? 'sent' : 'received');
+      messageElement.innerHTML = `<div class="content">${msg.split(":")[1]}</div>`;
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    // Configurar o nome de usuário
+    function setUser() {
+      const username = document.getElementById('username-input').value;
+      if (username.trim() !== "") {
+        socket.emit('set_user', username);  // Enviar nome de usuário
+        document.getElementById('chat-container').style.display = 'flex';
+        document.getElementById('username-container').style.display = 'none';
+        document.getElementById('chat-username').textContent = username;  // Exibir nome no cabeçalho
+      }
+    }
+
+    // Enviar mensagem
+    function sendMessage() {
+      const message = document.getElementById('message-input').value;
+      if (message.trim() !== "") {
+        socket.send(message);  // Enviar mensagem sem prefixo
+        document.getElementById('message-input').value = "";  // Limpar o campo de mensagem
+      }
+    }
+  </script>
+
+</body>
+</html>
