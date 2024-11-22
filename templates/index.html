@@ -11,12 +11,17 @@
       margin: 0;
       padding: 0;
       background-color: #e5ddd5;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .chat-container {
-      width: 400px;
-      height: 600px;
-      margin: 50px auto;
+      width: 100%;
+      max-width: 500px;
+      height: 100vh;
+      margin: 0;
       background-color: #fff;
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -35,7 +40,7 @@
     }
 
     .chat-box {
-      flex: 1;
+      flex-grow: 1;
       padding: 20px;
       overflow-y: auto;
       background-color: #f1f1f1;
