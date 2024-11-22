@@ -4,22 +4,28 @@ eventlet.monkey_patch()  # Mover para o topo para garantir que o monkey patch se
 from flask import Flask, render_template, request
 import json
 from flask_socketio import SocketIO, send, disconnect
+import threading  # Para uso de bloqueio
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")  # Certifique-se de que o CORS esteja configurado corretamente
 
+# Criando um bloqueio para acessar arquivos de forma segura
+lock = threading.Lock()
+
 # Carregar usuários do arquivo JSON
 def load_users():
-    try:
-        with open('usuarios.json', 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
+    with lock:
+        try:
+            with open('usuarios.json', 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return []
 
 # Salvar usuários no arquivo JSON
 def save_users(users):
-    with open('usuarios.json', 'w') as f:
-        json.dump(users, f, indent=2)
+    with lock:
+        with open('usuarios.json', 'w') as f:
+            json.dump(users, f, indent=2)
 
 # Dicionário para armazenar as sessões de usuário
 usuarios_conectados = {}
@@ -70,16 +76,18 @@ def handle_disconnect():
 
 def load_chat_messages():
     """Carregar mensagens do chat de um arquivo (persistência)"""
-    try:
-        with open('chat_messages.json', 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
+    with lock:
+        try:
+            with open('chat_messages.json', 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return []
 
 def save_chat_messages(messages):
     """Salvar mensagens no arquivo (persistência)"""
-    with open('chat_messages.json', 'w') as f:
-        json.dump(messages, f, indent=2)
+    with lock:
+        with open('chat_messages.json', 'w') as f:
+            json.dump(messages, f, indent=2)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
