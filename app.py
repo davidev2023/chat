@@ -76,5 +76,5 @@ def save_chat_messages(messages):
         json.dump(messages, f, indent=2)
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000)
 
