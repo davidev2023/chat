@@ -1,9 +1,10 @@
+import eventlet
+eventlet.monkey_patch()
 import json
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, send, disconnect
 from datetime import datetime
-import eventlet
-eventlet.monkey_patch()
+
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
