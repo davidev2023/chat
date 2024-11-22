@@ -5,7 +5,7 @@ import json
 from flask_socketio import SocketIO, send, disconnect
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode="eventlet")
 
 # Carregar usuários do arquivo JSON
 def load_users():
